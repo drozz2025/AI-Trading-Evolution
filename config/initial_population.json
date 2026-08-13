@@ -1,0 +1,19 @@
+{
+  "market": "XAUUSD",
+  "mode": "simulation",
+  "initial_capital_eur": 50,
+  "population_size": 10,
+  "live_execution_enabled": false,
+  "agents": [
+    {"id": "AGENT-001", "role": "research_trader", "status": "born"},
+    {"id": "AGENT-002", "role": "research_trader", "status": "born"},
+    {"id": "AGENT-003", "role": "research_trader", "status": "born"},
+    {"id": "AGENT-004", "role": "research_trader", "status": "born"},
+    {"id": "AGENT-005", "role": "research_trader", "status": "born"},
+    {"id": "AGENT-006", "role": "research_trader", "status": "born"},
+    {"id": "AGENT-007", "role": "research_trader", "status": "born"},
+    {"id": "AGENT-008", "role": "research_trader", "status": "born"},
+    {"id": "AGENT-009", "role": "research_trader", "status": "born"},
+    {"id": "AGENT-010", "role": "research_trader", "status": "born"}
+  ]
+}
