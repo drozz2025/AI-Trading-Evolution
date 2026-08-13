@@ -1,9 +1,4 @@
-"""Autonomous research engine: agents generate and mutate explicit hypotheses.
-
-This module intentionally generates research specifications, not live trading orders.
-It keeps an archive of prior hypotheses so the population can explore new ideas
-without endlessly repeating the same rules.
-"""
+"""Autonomous research engine: agents generate and mutate explicit hypotheses."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -11,6 +6,15 @@ import random
 
 from .research_roles import MANDATES, ResearchRole
 from .strategy_lab import StrategyHypothesis
+
+
+@dataclass(frozen=True)
+class Hypothesis:
+    """Compact hypothesis model used by the orchestration layer."""
+    role: str
+    thesis: str
+    features: tuple[str, ...]
+    rules: tuple[str, ...] = ()
 
 
 @dataclass
@@ -43,17 +47,14 @@ class HypothesisEngine:
             "test asymmetric exits while keeping entry logic stable",
         ]
         thesis = f"{mandate.objective}; {self.rng.choice(variants)}."
-        entry = f"derive a rule from {feature_text} without future information"
-        exit_logic = "exit on thesis invalidation, time limit, or volatility-adjusted risk limit"
-        risk = "position size capped; include spread, slippage and drawdown costs"
         hypothesis = StrategyHypothesis(
             name=f"{role.value}-{agent_id}-H{self.counter:05d}",
             role=role.value,
             thesis=thesis,
             features=mandate.allowed_features,
-            entry_logic=entry,
-            exit_logic=exit_logic,
-            risk_logic=risk,
+            entry_logic=f"derive a rule from {feature_text} without future information",
+            exit_logic="exit on thesis invalidation, time limit, or volatility-adjusted risk limit",
+            risk_logic="position size capped; include spread, slippage and drawdown costs",
             timeframe=self.rng.choice(("5m", "15m", "1h", "4h")),
             parameters={"risk_fraction": round(self.rng.uniform(0.10, 0.50), 4)},
         )
@@ -61,12 +62,11 @@ class HypothesisEngine:
         return hypothesis
 
     def mutate(self, parent: StrategyHypothesis, agent_id: str) -> StrategyHypothesis:
-        """Create a child hypothesis while preserving the parent's research thesis."""
+        """Create a child hypothesis with a controlled mutation."""
         self.counter += 1
         params = dict(parent.parameters)
         params["risk_fraction"] = round(
-            max(0.05, min(0.75, params.get("risk_fraction", 0.25) * self.rng.uniform(0.8, 1.2))),
-            4,
+            max(0.05, min(0.75, params.get("risk_fraction", 0.25) * self.rng.uniform(0.8, 1.2))), 4
         )
         child = StrategyHypothesis(
             name=f"{parent.role}-{agent_id}-M{self.counter:05d}",
