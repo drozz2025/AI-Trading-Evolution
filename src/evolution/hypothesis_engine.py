@@ -12,6 +12,7 @@ from .strategy_lab import StrategyHypothesis
 class Hypothesis:
     """Canonical hypothesis contract used by the autonomous cycle."""
     hypothesis_id: str
+    name: str
     role: str
     thesis: str
     features: tuple[str, ...]
@@ -20,6 +21,7 @@ class Hypothesis:
     risk_logic: str
     timeframe: str
     parameters: dict[str, float] = field(default_factory=dict)
+    rules: tuple[str, ...] = ()
     forbidden_shortcuts: tuple[str, ...] = ("RSI-only", "single-indicator crossover")
 
 
@@ -42,6 +44,23 @@ class HypothesisEngine:
         self.archive = archive or HypothesisArchive()
         self.counter = 0
 
+    @staticmethod
+    def _to_hypothesis(strategy: StrategyHypothesis) -> Hypothesis:
+        return Hypothesis(
+            hypothesis_id=strategy.hypothesis_id,
+            name=strategy.name,
+            role=strategy.role,
+            thesis=strategy.thesis,
+            features=strategy.features,
+            entry_logic=strategy.entry_logic,
+            exit_logic=strategy.exit_logic,
+            risk_logic=strategy.risk_logic,
+            timeframe=strategy.timeframe,
+            parameters=dict(strategy.parameters),
+            rules=(strategy.entry_logic, strategy.exit_logic, strategy.risk_logic),
+            forbidden_shortcuts=strategy.forbidden_shortcuts,
+        )
+
     def generate(self, agent_id: str, role: ResearchRole) -> Hypothesis:
         mandate = MANDATES[role]
         self.counter += 1
@@ -52,11 +71,10 @@ class HypothesisEngine:
             "test whether the effect survives volatility normalization",
             "test asymmetric exits while keeping entry logic stable",
         ]
-        thesis = f"{mandate.objective}; {self.rng.choice(variants)}."
         strategy = StrategyHypothesis(
             name=f"{role.value}-{agent_id}-H{self.counter:05d}",
             role=role.value,
-            thesis=thesis,
+            thesis=f"{mandate.objective}; {self.rng.choice(variants)}.",
             features=mandate.allowed_features,
             entry_logic=f"derive a rule from {feature_text} without future information",
             exit_logic="exit on thesis invalidation, time limit, or volatility-adjusted risk limit",
@@ -65,20 +83,9 @@ class HypothesisEngine:
             parameters={"risk_fraction": round(self.rng.uniform(0.10, 0.50), 4)},
         )
         self.archive.add(strategy)
-        return Hypothesis(
-            hypothesis_id=strategy.hypothesis_id,
-            role=strategy.role,
-            thesis=strategy.thesis,
-            features=strategy.features,
-            entry_logic=strategy.entry_logic,
-            exit_logic=strategy.exit_logic,
-            risk_logic=strategy.risk_logic,
-            timeframe=strategy.timeframe,
-            parameters=strategy.parameters,
-            forbidden_shortcuts=strategy.forbidden_shortcuts,
-        )
+        return self._to_hypothesis(strategy)
 
-    def mutate(self, parent: StrategyHypothesis, agent_id: str) -> StrategyHypothesis:
+    def mutate(self, parent: Hypothesis, agent_id: str) -> Hypothesis:
         """Create a child hypothesis with a controlled mutation."""
         self.counter += 1
         params = dict(parent.parameters)
@@ -98,4 +105,4 @@ class HypothesisEngine:
             forbidden_shortcuts=parent.forbidden_shortcuts,
         )
         self.archive.add(child)
-        return child
+        return self._to_hypothesis(child)
