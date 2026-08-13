@@ -29,7 +29,7 @@ class Result:
 
 
 def make_market(n: int = 3000, seed: int = 7) -> list[float]:
-    """Generate a deterministic synthetic price series for smoke testing."""
+    """Generate a deterministic synthetic XAUUSD-like price series for smoke testing."""
     rng = random.Random(seed)
     price = 2000.0
     prices = [price]
@@ -61,23 +61,25 @@ def _signal(prices: list[float], i: int, g: Genome) -> int:
 
 
 def evaluate(prices: list[float], g: Genome, start: int, end: int, fee_bps: float = 2.0) -> Result:
-    """Long/short close-to-close evaluation with one-step signal lag."""
+    """Evaluate only the requested window; signals use data available before each bar."""
+    warmup = max(g.slow, g.momentum) + 1
+    first = max(start, warmup)
     equity = 1.0
     peak = 1.0
     max_dd = 0.0
     returns: list[float] = []
     position = 0
     trades = 0
-    for i in range(max(g.slow, g.momentum) + 1, end):
-        signal = _signal(prices, i - 1, g)
-        if signal != position:
-            if signal:
-                trades += 1
-            position = signal
+    for i in range(first, end):
+        new_position = _signal(prices, i - 1, g)
+        changed = new_position != position
+        if changed:
+            trades += int(new_position != 0)
         market_return = prices[i] / prices[i - 1] - 1.0
-        pnl = position * market_return * g.risk
-        if signal != 0 and signal != position:
+        pnl = new_position * market_return * g.risk
+        if changed and new_position != 0:
             pnl -= fee_bps / 10000.0
+        position = new_position
         equity *= max(0.0001, 1.0 + pnl)
         returns.append(pnl)
         peak = max(peak, equity)
@@ -101,12 +103,15 @@ def mutate(g: Genome, rng: random.Random) -> Genome:
 
 
 def run(seed: int = 7, population: int = 10, generations: int = 5) -> dict:
-    """Run a small lab evolution with train/validation/test separation."""
+    """Run a small lab evolution with strict train/validation/test separation."""
     prices = make_market(seed=seed)
     train_end = int(len(prices) * 0.60)
     valid_end = int(len(prices) * 0.80)
     rng = random.Random(seed)
-    agents = [Genome(rng.randint(5, 40), rng.randint(50, 160), rng.randint(3, 35), rng.uniform(0.0001, 0.002), rng.uniform(0.25, 1.0)) for _ in range(population)]
+    agents = [
+        Genome(rng.randint(5, 40), rng.randint(50, 160), rng.randint(3, 35), rng.uniform(0.0001, 0.002), rng.uniform(0.25, 1.0))
+        for _ in range(population)
+    ]
     for _ in range(generations):
         scored = [(evaluate(prices, g, 0, train_end), g) for g in agents]
         scored.sort(key=lambda x: x[0].score, reverse=True)
