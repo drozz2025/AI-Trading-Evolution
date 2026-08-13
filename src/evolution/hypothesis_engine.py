@@ -28,7 +28,7 @@ class Hypothesis:
 class HypothesisArchive:
     seen: set[str] = field(default_factory=set)
 
-    def add(self, hypothesis: StrategyHypothesis) -> bool:
+    def add(self, hypothesis: StrategyHypothesis | Hypothesis) -> bool:
         if hypothesis.hypothesis_id in self.seen:
             return False
         self.seen.add(hypothesis.hypothesis_id)
@@ -86,7 +86,7 @@ class HypothesisEngine:
         self.counter += 1
         params = dict(parent.parameters)
         params["risk_fraction"] = round(max(0.05, min(0.75, params.get("risk_fraction", 0.25) * self.rng.uniform(0.8, 1.2))), 4)
-        return Hypothesis(
+        child = Hypothesis(
             hypothesis_id=f"{parent.hypothesis_id}-M{self.counter:05d}",
             name=f"{parent.name}-{agent_id}-M{self.counter:05d}",
             role=parent.role,
@@ -100,3 +100,5 @@ class HypothesisEngine:
             rules=parent.rules,
             forbidden_shortcuts=parent.forbidden_shortcuts,
         )
+        self.archive.add(child)
+        return child
