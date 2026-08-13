@@ -10,16 +10,15 @@ from .strategy_lab import StrategyHypothesis
 
 @dataclass(frozen=True)
 class Hypothesis:
-    """Canonical hypothesis contract used by the autonomous cycle."""
-    hypothesis_id: str
-    name: str
-    role: str
-    thesis: str
-    features: tuple[str, ...]
-    entry_logic: str
-    exit_logic: str
-    risk_logic: str
-    timeframe: str
+    hypothesis_id: str = "legacy"
+    name: str = "unnamed"
+    role: str = "unknown"
+    thesis: str = ""
+    features: tuple[str, ...] = ()
+    entry_logic: str = ""
+    exit_logic: str = ""
+    risk_logic: str = ""
+    timeframe: str = "1h"
     parameters: dict[str, float] = field(default_factory=dict)
     rules: tuple[str, ...] = ()
     forbidden_shortcuts: tuple[str, ...] = ("RSI-only", "single-indicator crossover")
@@ -37,8 +36,6 @@ class HypothesisArchive:
 
 
 class HypothesisEngine:
-    """Turns a research mandate into diverse, testable candidate hypotheses."""
-
     def __init__(self, seed: int = 42, archive: HypothesisArchive | None = None):
         self.rng = random.Random(seed)
         self.archive = archive or HypothesisArchive()
@@ -86,14 +83,12 @@ class HypothesisEngine:
         return self._to_hypothesis(strategy)
 
     def mutate(self, parent: Hypothesis, agent_id: str) -> Hypothesis:
-        """Create a child hypothesis with a controlled mutation."""
         self.counter += 1
         params = dict(parent.parameters)
-        params["risk_fraction"] = round(
-            max(0.05, min(0.75, params.get("risk_fraction", 0.25) * self.rng.uniform(0.8, 1.2))), 4
-        )
-        child = StrategyHypothesis(
-            name=f"{parent.role}-{agent_id}-M{self.counter:05d}",
+        params["risk_fraction"] = round(max(0.05, min(0.75, params.get("risk_fraction", 0.25) * self.rng.uniform(0.8, 1.2))), 4)
+        return Hypothesis(
+            hypothesis_id=f"{parent.hypothesis_id}-M{self.counter:05d}",
+            name=f"{parent.name}-{agent_id}-M{self.counter:05d}",
             role=parent.role,
             thesis=parent.thesis + " Child variant tests a controlled mutation.",
             features=parent.features,
@@ -102,7 +97,6 @@ class HypothesisEngine:
             risk_logic=parent.risk_logic,
             timeframe=parent.timeframe,
             parameters=params,
+            rules=parent.rules,
             forbidden_shortcuts=parent.forbidden_shortcuts,
         )
-        self.archive.add(child)
-        return self._to_hypothesis(child)
