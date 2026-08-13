@@ -1,0 +1,8 @@
+fcmaes
+loguru
+numba
+numpy
+openai
+pandas
+scipy
+yfinance
