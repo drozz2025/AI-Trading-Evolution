@@ -10,11 +10,17 @@ from .strategy_lab import StrategyHypothesis
 
 @dataclass(frozen=True)
 class Hypothesis:
-    """Compact hypothesis model used by the orchestration layer."""
+    """Canonical hypothesis contract used by the autonomous cycle."""
+    hypothesis_id: str
     role: str
     thesis: str
     features: tuple[str, ...]
-    rules: tuple[str, ...] = ()
+    entry_logic: str
+    exit_logic: str
+    risk_logic: str
+    timeframe: str
+    parameters: dict[str, float] = field(default_factory=dict)
+    forbidden_shortcuts: tuple[str, ...] = ("RSI-only", "single-indicator crossover")
 
 
 @dataclass
@@ -36,7 +42,7 @@ class HypothesisEngine:
         self.archive = archive or HypothesisArchive()
         self.counter = 0
 
-    def generate(self, agent_id: str, role: ResearchRole) -> StrategyHypothesis:
+    def generate(self, agent_id: str, role: ResearchRole) -> Hypothesis:
         mandate = MANDATES[role]
         self.counter += 1
         feature_text = ", ".join(mandate.allowed_features)
@@ -47,7 +53,7 @@ class HypothesisEngine:
             "test asymmetric exits while keeping entry logic stable",
         ]
         thesis = f"{mandate.objective}; {self.rng.choice(variants)}."
-        hypothesis = StrategyHypothesis(
+        strategy = StrategyHypothesis(
             name=f"{role.value}-{agent_id}-H{self.counter:05d}",
             role=role.value,
             thesis=thesis,
@@ -58,8 +64,19 @@ class HypothesisEngine:
             timeframe=self.rng.choice(("5m", "15m", "1h", "4h")),
             parameters={"risk_fraction": round(self.rng.uniform(0.10, 0.50), 4)},
         )
-        self.archive.add(hypothesis)
-        return hypothesis
+        self.archive.add(strategy)
+        return Hypothesis(
+            hypothesis_id=strategy.hypothesis_id,
+            role=strategy.role,
+            thesis=strategy.thesis,
+            features=strategy.features,
+            entry_logic=strategy.entry_logic,
+            exit_logic=strategy.exit_logic,
+            risk_logic=strategy.risk_logic,
+            timeframe=strategy.timeframe,
+            parameters=strategy.parameters,
+            forbidden_shortcuts=strategy.forbidden_shortcuts,
+        )
 
     def mutate(self, parent: StrategyHypothesis, agent_id: str) -> StrategyHypothesis:
         """Create a child hypothesis with a controlled mutation."""
