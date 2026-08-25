@@ -1,0 +1,27 @@
+name: Trading Guard CI
+
+on:
+  push:
+    paths:
+      - 'trading_guard/**'
+      - '.github/workflows/trading-guard-ci.yml'
+  pull_request:
+    paths:
+      - 'trading_guard/**'
+      - '.github/workflows/trading-guard-ci.yml'
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: trading_guard/backend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -e '.[test]'
+      - name: Run tests
+        run: pytest -q
