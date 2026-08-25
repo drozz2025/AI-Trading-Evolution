@@ -25,11 +25,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Prepare site
         run: |
-          mkdir -p _site
-          cp -R trading_guard/demo/. _site/
+          set -e
+          rm -rf _site
           mkdir -p _site/admin _site/academy
+          cp -R trading_guard/demo/. _site/
           cp trading_guard/admin/index.html _site/admin/index.html
           cp trading_guard/academy/index.html _site/academy/index.html
+          test -f _site/index.html
+          test -f _site/admin/index.html
+          test -f _site/academy/index.html
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
