@@ -1,47 +1,7 @@
-name: Deploy Trading Guard Demo
+name: Legacy Pages Workflow (disabled)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
-jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Prepare site
-        run: |
-          set -e
-          rm -rf _site
-          mkdir -p _site/admin _site/academy
-          cp -R trading_guard/demo/. _site/
-          cp trading_guard/admin/index.html _site/admin/index.html
-          cp trading_guard/academy/index.html _site/academy/index.html
-          test -f _site/index.html
-          test -f _site/admin/index.html
-          test -f _site/academy/index.html
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-# Latest UI deployment trigger
