@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trading Guard — Demo</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;background:#f5f7fa;color:#17202a}.wrap{max-width:900px;margin:auto;padding:24px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{background:white;border-radius:14px;padding:18px;box-shadow:0 2px 10px #0001}.big{font-size:28px;font-weight:700}.ok{color:#16834b}.warn{color:#b26a00}.danger{color:#c0392b}button{padding:12px 16px;border:0;border-radius:10px;background:#17202a;color:white} @media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div class="wrap">
+<h1>Trading Guard</h1><p>Trader protection dashboard — Demo Mode</p>
+<button onclick="loadDemo()">Atualizar dados</button>
+<div id="app" style="margin-top:20px">A carregar...</div>
+</div>
+<script>
+async function loadDemo(){
+ const a=await fetch('/api/v1/demo/account').then(r=>r.json());
+ const p=await fetch('/api/v1/demo/positions').then(r=>r.json());
+ const x=a.account;
+ const signals=a.behaviour||[];
+ document.getElementById('app').innerHTML=`<div class="grid">
+ <div class="card"><div>Balance</div><div class="big">€${x.balance.toFixed(2)}</div></div>
+ <div class="card"><div>Equity</div><div class="big">€${x.equity.toFixed(2)}</div></div>
+ <div class="card"><div>Daily P&L</div><div class="big ${x.daily_pnl<0?'danger':'ok'}">€${x.daily_pnl.toFixed(2)}</div></div>
+ <div class="card"><div>Trades today</div><div class="big">${x.trades_today}</div></div>
+ <div class="card"><div>Consecutive losses</div><div class="big danger">${x.consecutive_losses}</div></div>
+ <div class="card"><div>Behaviour</div><div class="big ${signals.length?'warn':'ok'}">${signals.length?'ATTENTION':'OK'}</div></div>
+ </div>
+ <div class="card" style="margin-top:12px"><h2>Open positions</h2>${p.positions.map(v=>`<p><b>${v.symbol} ${v.side}</b> · ${v.volume} lot · P&L €${v.profit.toFixed(2)}</p>`).join('')}</div>
+ <div class="card" style="margin-top:12px"><h2>Alerts</h2>${signals.map(s=>`<p class="${s.severity==='high'?'danger':'warn'}"><b>${s.code}</b>: ${s.message}</p>`).join('')||'<p class="ok">No alerts</p>'}</div>`;
+}
+loadDemo();
+</script></body></html>
