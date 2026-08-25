@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import time
 from fastapi import APIRouter, Header, HTTPException
 from .auth import user_id_from_token, _db
 
@@ -21,10 +22,16 @@ def overview(authorization: str | None = Header(default=None)):
     users = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     sessions = conn.execute("SELECT COUNT(*) FROM sessions WHERE expires_at > strftime('%s','now')").fetchone()[0]
     conn.close()
-    return {"users": users, "active_sessions": sessions, "mode": "read-only"}
+    return {"users": users, "active_sessions": sessions, "mode": "read-only", "trading_execution": "disabled", "server_time": int(time.time())}
 
 @router.get("/users")
 def users(authorization: str | None = Header(default=None)):
     require_admin(authorization)
     conn = _db(); rows = conn.execute("SELECT id,email,created_at FROM users ORDER BY id DESC").fetchall(); conn.close()
     return {"users":[{"id":r[0],"email":r[1],"created_at":r[2]} for r in rows]}
+
+@router.get("/security")
+def security(authorization: str | None = Header(default=None)):
+    require_admin(authorization)
+    conn = _db(); expired = conn.execute("SELECT COUNT(*) FROM sessions WHERE expires_at <= strftime('%s','now')").fetchone()[0]; conn.close()
+    return {"authentication":"enabled", "session_expiry":True, "expired_sessions":expired, "trading_execution":"disabled", "admin_allowlist_configured":bool(ADMIN_EMAILS)}
