@@ -27,6 +27,9 @@ jobs:
         run: |
           mkdir -p _site
           cp -R trading_guard/demo/. _site/
+          mkdir -p _site/admin _site/academy
+          cp trading_guard/admin/index.html _site/admin/index.html
+          cp trading_guard/academy/index.html _site/academy/index.html
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
