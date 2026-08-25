@@ -6,6 +6,7 @@ on:
     paths:
       - 'trading_guard/demo/**'
       - 'trading_guard/admin/**'
+      - 'trading_guard/academy/**'
       - '.github/workflows/trading-guard-pages.yml'
   workflow_dispatch:
 
@@ -15,7 +16,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: trading-guard-pages
   cancel-in-progress: true
 
 jobs:
@@ -31,10 +32,15 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Prepare static site
         run: |
+          set -e
           rm -rf _site
-          mkdir -p _site/admin
+          mkdir -p _site/admin _site/academy
           cp trading_guard/demo/index.html _site/index.html
           cp trading_guard/admin/index.html _site/admin/index.html
+          cp trading_guard/academy/index.html _site/academy/index.html
+          test -f _site/index.html
+          test -f _site/admin/index.html
+          test -f _site/academy/index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
