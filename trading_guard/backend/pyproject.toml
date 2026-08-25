@@ -1,0 +1,9 @@
+[project]
+name = "trading-guard-api"
+version = "0.1.0"
+description = "Read-only risk and behaviour API for MT5 trading accounts"
+requires-python = ">=3.11"
+dependencies = ["fastapi>=0.116,<1", "uvicorn[standard]>=0.35,<1"]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9", "httpx>=0.28,<1"]
