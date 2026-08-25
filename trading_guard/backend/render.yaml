@@ -8,5 +8,9 @@ services:
     envVars:
       - key: METAAPI_TOKEN
         sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_VISION_MODEL
+        value: gpt-5.6-luna
       - key: METAAPI_CLIENT_BASE_URL
         value: https://mt-client-api-v1.new-york.agiliumtrade.ai
