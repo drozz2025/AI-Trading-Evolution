@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: trading-guard-api
+    runtime: docker
+    dockerfilePath: trading_guard/backend/Dockerfile
+    dockerContext: trading_guard/backend
+    healthCheckPath: /health
+    envVars:
+      - key: METAAPI_TOKEN
+        sync: false
+      - key: METAAPI_CLIENT_BASE_URL
+        value: https://mt-client-api-v1.new-york.agiliumtrade.ai
