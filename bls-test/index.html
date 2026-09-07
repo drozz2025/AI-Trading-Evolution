@@ -1,0 +1,4 @@
+<!doctype html>
+<html lang="pt-PT">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BLS Test</title><style>body{font-family:Arial;max-width:900px;margin:40px auto;padding:20px}input,button{padding:10px;margin:5px}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #ccc;padding:8px;text-align:left}code{word-break:break-all}</style></head>
+<body><h1>BLS Test</h1><p>Simulador de notícias para testar o EA em demo.</p><p>API: <code>/api/events</code></p><table><thead><tr><th>Evento</th><th>Hora</th><th>Forecast</th><th>Actual</th><th>Previous</th></tr></thead><tbody id="rows"></tbody></table><script>fetch('/events.json').then(r=>r.json()).then(d=>{document.getElementById('rows').innerHTML=d.events.map(e=>`<tr><td>${e.event}</td><td>${e.scheduled_time}</td><td>${e.forecast}</td><td>${e.actual}</td><td>${e.previous}</td></tr>`).join('')})</script></body></html>
