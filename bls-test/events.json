@@ -1,0 +1,34 @@
+{
+  "events": [
+    {
+      "id": "TEST-PPI-001",
+      "event": "PPI",
+      "country": "USD",
+      "scheduled_time": "2026-09-07T23:00:00+01:00",
+      "forecast": 0.2,
+      "actual": 0.5,
+      "previous": 0.1,
+      "status": "scheduled"
+    },
+    {
+      "id": "TEST-PPI-002",
+      "event": "PPI",
+      "country": "USD",
+      "scheduled_time": "2026-09-07T23:05:00+01:00",
+      "forecast": 0.3,
+      "actual": 0.0,
+      "previous": 0.2,
+      "status": "scheduled"
+    },
+    {
+      "id": "TEST-PPI-003",
+      "event": "PPI",
+      "country": "USD",
+      "scheduled_time": "2026-09-07T23:10:00+01:00",
+      "forecast": 0.1,
+      "actual": 0.8,
+      "previous": 0.0,
+      "status": "scheduled"
+    }
+  ]
+}
