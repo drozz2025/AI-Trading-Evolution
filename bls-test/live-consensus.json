@@ -1,0 +1,14 @@
+{
+  "updated_utc": "2026-09-10T22:40:00Z",
+  "source": "seeded from current consensus; auto-refresh workflow updates this file",
+  "events": [
+    {
+      "currency": "USD",
+      "type": "CPI",
+      "title": "Consumer Price Index y/y",
+      "date": "2026-09-11",
+      "forecast": 3.4,
+      "previous": 3.4
+    }
+  ]
+}
