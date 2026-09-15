@@ -1,0 +1,13 @@
+{
+  "id": "BASELINE-QUANTUM-QUEEN-X-4.1",
+  "name": "Quantum Queen X MT5 4.1 fix",
+  "source_filename": "Quantum Queen X MT5_4.1_fix.ex5",
+  "source_format": "EX5",
+  "baseline": true,
+  "immutable": true,
+  "mode": "BENCHMARK",
+  "evolution": "closed_binary",
+  "pipeline": ["brain", "backtest", "stress", "risk", "judge"],
+  "live_trading_enabled": false,
+  "notes": "EX5 compiled baseline. It can be benchmarked/tested by an MT5 runner but source-level mutation requires MQ5 source. Binary payload supplied by user is intentionally not reconstructed or decompiled."
+}
