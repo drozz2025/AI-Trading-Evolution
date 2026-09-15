@@ -14,21 +14,32 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements-test.txt
-      - name: Test Viveiro
+      - name: Test Viveiro code
         run: PYTHONPATH=src pytest -q
-      - name: Real historical market cycle
-        id: realmarket
-        continue-on-error: true
+      - name: Refresh real market history
+        run: python scripts/fetch_market_data.py
+      - name: Run real historical evolution cycle
         run: PYTHONPATH=src python scripts/run_real_market_lab.py
-      - name: Synthetic research cycle fallback
-        if: steps.realmarket.outcome != 'success'
-        run: PYTHONPATH=src python scripts/run_end_to_end_lab.py
       - name: Export dashboard status
         run: PYTHONPATH=src python scripts/export_dashboard_status.py
-      - name: Persist state and dashboard feed
+      - name: End-to-end assertions
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('data/viveiro_state.json').read_text())
+          d=json.loads(Path('dashboard/viveiro_status.json').read_text())
+          assert s['live_trading_enabled'] is False
+          assert len(s['backtests']) > 0
+          assert len(s['strategies']) > 0
+          assert d['backtests'] == len(s['backtests'])
+          assert d['strategies'] == len(s['strategies'])
+          print('END-TO-END VIVEIRO V1 OK')
+          PY
+      - name: Persist state, market data and dashboard feed
         run: |
           git config user.name viveiro-bot
           git config user.email actions@users.noreply.github.com
-          git add data/ dashboard/viveiro_status.json || true
-          git diff --cached --quiet || git commit -m 'chore: persist autonomous viveiro state'
-          git push || true
+          git add data/ dashboard/viveiro_status.json
+          git diff --cached --quiet || git commit -m 'chore: autonomous real-market viveiro cycle'
+          git push
