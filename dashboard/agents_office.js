@@ -1,16 +1,14 @@
-const $=s=>document.querySelector(s);
-async function loadViveiro(){
- try{
-  const r=await fetch('./viveiro_status.json?ts='+Date.now(),{cache:'no-store'}); if(!r.ok) throw Error(r.status);
-  const d=await r.json();
-  document.querySelectorAll('[data-v]').forEach(el=>{const k=el.dataset.v;if(k in d)el.textContent=d[k]});
-  const live=$('#live-state'); if(live) live.textContent=d.live_trading_enabled?'LIVE ATIVO':'LAB / LIVE BLOQUEADO';
-  const list=$('#task-list'); if(list){list.innerHTML=(d.tasks||[]).slice().reverse().map(t=>`<button class="task" data-task="${t.id}"><b>${t.agent_id||'SYSTEM'}</b><span>${t.type}</span><small>${t.status}</small></button>`).join('')||'<p>Sem tarefas persistidas.</p>';}
-  const stamp=$('#updated'); if(stamp) stamp.textContent=d.updated_at?new Date(d.updated_at).toLocaleString('pt-PT'):'A aguardar primeiro ciclo';
- }catch(e){const s=$('#feed-state');if(s)s.textContent='Feed ainda não disponível';}
+const $=s=>document.querySelector(s);let state={};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function table(items,cols){if(!items?.length)return '<div class="empty">Ainda sem dados persistidos.</div>';return `<div style="overflow:auto"><table><thead><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${items.slice().reverse().slice(0,100).map(x=>`<tr>${cols.map(c=>`<td>${esc(typeof c[1]==='function'?c[1](x):x[c[1]])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+function renderPages(d){
+ const nursery=$('#page-nursery');if(nursery)nursery.innerHTML=`<h1>VIVEIRO</h1><div class="cards"><div class="card">Geração<br><b>#${esc(d.generation)}</b></div><div class="card">Agentes ativos<br><b>${esc(d.active_agents)}</b></div><div class="card">Capital virtual<br><b>€${esc(d.capital)}</b></div></div><h2>Histórico evolutivo</h2>${table(d.history,[['Evento','event'],['Data','at']])}`;
+ const st=$('#page-strategies');if(st)st.innerHTML=`<h1>ESTRATÉGIAS</h1>${table(d.strategy_items||d.strategy_data||[],[['ID','id'],['Estratégia','name'],['Geração','generation'],['Estado','stage'],['Fonte','source']])}`;
+ const bt=$('#page-backtests');if(bt)bt.innerHTML=`<h1>BACKTESTS</h1>${table(d.backtest_items||d.backtest_data||[],[['ID','id'],['Estratégia','strategy'],['Fonte','source'],['Estado','stage']])}`;
+ const rp=$('#page-reports');if(rp)rp.innerHTML=`<h1>RELATÓRIOS</h1><p>Últimos eventos persistidos pelo laboratório autónomo.</p>${table(d.history||[],[['Evento','event'],['Data','at']])}`;
 }
-document.addEventListener('click',e=>{
- const nav=e.target.closest('[data-page]'); if(nav){document.querySelectorAll('[data-page]').forEach(x=>x.classList.remove('active'));nav.classList.add('active');document.querySelectorAll('.page').forEach(x=>x.hidden=true);const p=$('#page-'+nav.dataset.page);if(p)p.hidden=false;}
- const hub=e.target.closest('[data-hub]'); if(hub){const modal=$('#modal');modal.querySelector('h2').textContent=hub.dataset.hub;modal.querySelector('p').textContent='Departamento ligado ao Viveiro. Os dados serão atualizados pelo ciclo autónomo.';modal.showModal();}
-});
-loadViveiro();setInterval(loadViveiro,30000);
+async function loadViveiro(){try{let r=await fetch('./viveiro_status.json?ts='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error(r.status);state=await r.json();document.querySelectorAll('[data-v]').forEach(el=>{let k=el.dataset.v;if(k in state)el.textContent=state[k]});let live=$('#live-state');if(live)live.textContent=state.live_trading_enabled?'LIVE ATIVO':'LAB / LIVE BLOQUEADO';let list=$('#task-list');if(list)list.innerHTML=(state.tasks||[]).slice().reverse().map(t=>`<button class="task" data-task="${esc(t.id)}"><b>${esc(t.agent_id||'SYSTEM')}</b><span>${esc(t.type)}</span><small>${esc(t.status)}</small></button>`).join('')||'<p>Sem tarefas persistidas.</p>';let stamp=$('#updated');if(stamp)stamp.textContent=state.updated_at?new Date(state.updated_at).toLocaleString('pt-PT'):'A aguardar primeiro ciclo';renderPages(state)}catch(e){let s=$('#feed-state');if(s)s.textContent='Feed ainda não disponível'}}
+function go(page){document.querySelectorAll('.nav [data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page));document.querySelectorAll('.page').forEach(x=>x.hidden=true);let p=$('#page-'+page);if(p)p.hidden=false;location.hash=page;window.scrollTo({top:0,behavior:'smooth'})}
+function popup(title,body){let m=$('#modal');m.querySelector('h2').textContent=title;m.querySelector('p').innerHTML=body;m.showModal()}
+document.addEventListener('click',e=>{let nav=e.target.closest('.nav [data-page]');if(nav){e.preventDefault();go(nav.dataset.page);return}let hub=e.target.closest('[data-hub]');if(hub){popup(hub.dataset.hub,'Departamento ativo no Viveiro.<br><br>Consulta o estado nas páginas Viveiro, Estratégias e Backtests.');return}let task=e.target.closest('[data-task]');if(task){let t=(state.tasks||[]).find(x=>String(x.id)===task.dataset.task);popup('Tarefa '+task.dataset.task,t?`Agente: <b>${esc(t.agent_id||'SYSTEM')}</b><br>Tipo: ${esc(t.type)}<br>Estado: ${esc(t.status)}<br>${esc(t.detail||'')}`:'Detalhe da tarefa indisponível.');return}let act=e.target.closest('[data-action]');if(act){if(act.dataset.action==='refresh')loadViveiro();if(act.dataset.action==='office')go('office');if(act.dataset.action==='guard')go('guard')}});
+addEventListener('hashchange',()=>go((location.hash||'#office').slice(1)));go((location.hash||'#office').slice(1));loadViveiro();setInterval(loadViveiro,30000);
