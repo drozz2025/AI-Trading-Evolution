@@ -1,0 +1,25 @@
+name: Viveiro Autonomous Lab
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+permissions:
+  contents: write
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-test.txt
+      - name: Run laboratory evolution cycle
+        run: PYTHONPATH=src python scripts/run_end_to_end_lab.py
+      - name: Persist generated state
+        run: |
+          git config user.name viveiro-bot
+          git config user.email actions@users.noreply.github.com
+          git add data/ || true
+          git diff --cached --quiet || git commit -m 'chore: persist autonomous viveiro state'
+          git push || true
