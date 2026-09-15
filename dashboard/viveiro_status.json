@@ -1,0 +1,13 @@
+{
+  "mode": "LAB",
+  "generation": 0,
+  "capital": 1000.0,
+  "agents": 20,
+  "active_agents": 20,
+  "strategies": 0,
+  "backtests": 0,
+  "tasks": [],
+  "history": [],
+  "live_trading_enabled": false,
+  "updated_at": null
+}
