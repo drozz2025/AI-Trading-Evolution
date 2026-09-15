@@ -4,10 +4,65 @@
   "capital": 1000.0,
   "agents": 20,
   "active_agents": 20,
-  "strategies": 0,
+  "strategies": 1,
   "backtests": 0,
-  "tasks": [],
-  "history": [],
+  "promoted": 0,
+  "rejected": 0,
+  "best_strategies": [],
+  "strategy_items": [
+    {
+      "id": "STRAT-00001",
+      "name": "Quantum Queen X MT5_4.1_fix.ex5",
+      "generation": 0,
+      "parent_strategy_id": null,
+      "stage": "benchmark_queued",
+      "source_format": "EX5",
+      "mode": "BENCHMARK",
+      "baseline": true,
+      "immutable": true,
+      "evolvable": false,
+      "live_trading_enabled": false
+    }
+  ],
+  "backtest_items": [],
+  "agent_items": [],
+  "tasks": [
+    {
+      "id": "TASK-00001",
+      "agent_id": "THE-BRAIN",
+      "strategy_id": "STRAT-00001",
+      "team": "backtest",
+      "type": "Prepare Quantum Queen EX5 benchmark mission",
+      "status": "queued"
+    },
+    {
+      "id": "TASK-00002",
+      "agent_id": "RISK-TEAM",
+      "strategy_id": "STRAT-00001",
+      "team": "risk",
+      "type": "Risk review after MT5 benchmark results",
+      "status": "waiting"
+    },
+    {
+      "id": "TASK-00003",
+      "agent_id": "JUDGE",
+      "strategy_id": "STRAT-00001",
+      "team": "judge",
+      "type": "Judge benchmark after tests and stress checks",
+      "status": "waiting"
+    }
+  ],
+  "history": [
+    {
+      "kind": "strategy_registered",
+      "strategy_id": "STRAT-00001",
+      "name": "Quantum Queen X MT5_4.1_fix.ex5",
+      "generation": 0,
+      "tested": 0,
+      "promoted": 0,
+      "at": "2026-09-15T12:11:06Z"
+    }
+  ],
   "live_trading_enabled": false,
-  "updated_at": null
+  "updated_at": "2026-09-15T12:15:30Z"
 }
