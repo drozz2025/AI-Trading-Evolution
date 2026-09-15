@@ -14,7 +14,14 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements-test.txt
-      - name: Run laboratory evolution cycle
+      - name: Test Viveiro
+        run: PYTHONPATH=src pytest -q
+      - name: Real historical market cycle
+        id: realmarket
+        continue-on-error: true
+        run: PYTHONPATH=src python scripts/run_real_market_lab.py
+      - name: Synthetic research cycle fallback
+        if: steps.realmarket.outcome != 'success'
         run: PYTHONPATH=src python scripts/run_end_to_end_lab.py
       - name: Export dashboard status
         run: PYTHONPATH=src python scripts/export_dashboard_status.py
