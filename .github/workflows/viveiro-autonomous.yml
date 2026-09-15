@@ -2,12 +2,16 @@ name: Viveiro Autonomous Lab
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 * * * *'
+    - cron: '7,27,47 * * * *'
 permissions:
   contents: write
+concurrency:
+  group: viveiro-autonomous-lab
+  cancel-in-progress: false
 jobs:
   evolve:
     runs-on: ubuntu-latest
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,17 +33,20 @@ jobs:
           from pathlib import Path
           s=json.loads(Path('data/viveiro_state.json').read_text())
           d=json.loads(Path('dashboard/viveiro_status.json').read_text())
+          h=json.loads(Path('data/market/history_status.json').read_text())
           assert s['live_trading_enabled'] is False
           assert len(s['backtests']) > 0
           assert len(s['strategies']) > 0
           assert d['backtests'] == len(s['backtests'])
           assert d['strategies'] == len(s['strategies'])
-          print('END-TO-END VIVEIRO V1 OK')
+          assert 'XAUUSD' in h['symbols']
+          assert h['symbols']['XAUUSD'].get('ok') or h['symbols']['XAUUSD'].get('kept_previous')
+          print('END-TO-END VIVEIRO CLOUD LAB OK')
           PY
       - name: Persist state, market data and dashboard feed
         run: |
           git config user.name viveiro-bot
           git config user.email actions@users.noreply.github.com
           git add data/ dashboard/viveiro_status.json
-          git diff --cached --quiet || git commit -m 'chore: autonomous real-market viveiro cycle'
+          git diff --cached --quiet || git commit -m 'chore: autonomous cloud-market viveiro cycle'
           git push
