@@ -47,39 +47,54 @@ def parse_date(s):
     return None
 
 req = urllib.request.Request(URL, headers={"User-Agent": "Mozilla/5.0"})
-with urllib.request.urlopen(req, timeout=20) as r:
-    xml = r.read()
 
-root = ET.fromstring(xml)
-events = []
-for e in root.findall(".//event"):
-    country = (e.findtext("country") or "").strip()
-    title = (e.findtext("title") or "").strip()
-    typ = classify(title)
-    if country != "USD" or not typ:
-        continue
-    date = parse_date(e.findtext("date") or "")
-    forecast = num(e.findtext("forecast"))
-    previous = num(e.findtext("previous"))
-    if not date or forecast is None:
-        continue
-    events.append({
-        "currency": "USD",
-        "type": typ,
-        "title": title,
-        "date": date,
-        "forecast": forecast,
-        "previous": previous,
-    })
 
-if not events:
-    raise SystemExit("No CPI/NFP consensus events parsed; refusing to overwrite current feed")
+def fetch_calendar_xml():
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return r.read()
 
-payload = {
-    "updated_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-    "source": URL,
-    "events": events,
-}
-OUT.parent.mkdir(parents=True, exist_ok=True)
-OUT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-print(json.dumps(payload, indent=2))
+
+def parse_events(xml):
+    root = ET.fromstring(xml)
+    events = []
+    for e in root.findall(".//event"):
+        country = (e.findtext("country") or "").strip()
+        title = (e.findtext("title") or "").strip()
+        typ = classify(title)
+        if country != "USD" or not typ:
+            continue
+        date = parse_date(e.findtext("date") or "")
+        forecast = num(e.findtext("forecast"))
+        previous = num(e.findtext("previous"))
+        if not date or forecast is None:
+            continue
+        events.append({
+            "currency": "USD",
+            "type": typ,
+            "title": title,
+            "date": date,
+            "forecast": forecast,
+            "previous": previous,
+        })
+    return events
+
+
+def main():
+    events = parse_events(fetch_calendar_xml())
+    if not events:
+        print("No CPI/NFP consensus events parsed; leaving current feed unchanged")
+        return 0
+
+    payload = {
+        "updated_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "source": URL,
+        "events": events,
+    }
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(payload, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
