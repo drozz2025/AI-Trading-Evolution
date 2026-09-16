@@ -24,6 +24,8 @@ jobs:
         run: python scripts/fetch_market_data.py
       - name: Run real historical evolution cycle
         run: PYTHONPATH=src python scripts/run_real_market_lab.py
+      - name: Process persisted Brain missions
+        run: PYTHONPATH=src python scripts/execute_brain_missions.py
       - name: Export dashboard status
         run: PYTHONPATH=src python scripts/export_dashboard_status.py
       - name: End-to-end assertions
