@@ -1,14 +1,22 @@
 {
-  "updated_utc": "2026-09-13T00:14:02Z",
+  "updated_utc": "2026-09-27T07:35:46Z",
   "source": "https://nfs.faireconomy.media/ff_calendar_thisweek.xml",
   "events": [
     {
       "currency": "USD",
-      "type": "CPI",
-      "title": "CPI y/y",
-      "date": "2026-09-11",
-      "forecast": 3.4,
-      "previous": 3.4
+      "type": "NFP",
+      "title": "ADP Non-Farm Employment Change",
+      "date": "2026-09-30",
+      "forecast": 70.0,
+      "previous": 38.0
+    },
+    {
+      "currency": "USD",
+      "type": "NFP",
+      "title": "Non-Farm Employment Change",
+      "date": "2026-10-02",
+      "forecast": 98.0,
+      "previous": 162.0
     }
   ]
 }
