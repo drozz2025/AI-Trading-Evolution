@@ -1,5 +1,5 @@
 {
-  "updated_utc": "2026-10-01T02:29:19Z",
+  "updated_utc": "2026-10-01T09:21:53Z",
   "source": "https://nfs.faireconomy.media/ff_calendar_thisweek.xml",
   "events": [
     {
@@ -15,7 +15,7 @@
       "type": "NFP",
       "title": "Non-Farm Employment Change",
       "date": "2026-10-02",
-      "forecast": 90.0,
+      "forecast": 89.0,
       "previous": 162.0
     }
   ]
