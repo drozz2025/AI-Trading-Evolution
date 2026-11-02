@@ -1,5 +1,5 @@
 {
-  "updated_utc": "2026-11-02T13:19:35Z",
+  "updated_utc": "2026-11-02T22:22:58Z",
   "source": "https://nfs.faireconomy.media/ff_calendar_thisweek.xml",
   "events": [
     {
@@ -7,7 +7,7 @@
       "type": "NFP",
       "title": "ADP Non-Farm Employment Change",
       "date": "2026-11-04",
-      "forecast": 68.0,
+      "forecast": 67.0,
       "previous": 90.0
     },
     {
@@ -23,7 +23,7 @@
       "type": "NFP",
       "title": "Non-Farm Employment Change",
       "date": "2026-11-06",
-      "forecast": 63.0,
+      "forecast": 65.0,
       "previous": 29.0
     }
   ]
